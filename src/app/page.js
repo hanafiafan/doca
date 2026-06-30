@@ -1,20 +1,37 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { BOX_PACKAGES } from '@/lib/products';
 import { formatRupiah } from '@/lib/utils';
 import { useCartStore } from '@/store/useCartStore';
 import { useToastStore } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
+import { AdminLoginModal } from '@/components/ui/AdminLoginModal';
 import Link from 'next/link';
-import { Flame, ShoppingBag, Info, Package, Banknote, Target, Plus, Loader2, Sparkles, MoveRight, CheckCircle2 } from 'lucide-react';
+import { Flame, ShoppingBag, Package, Banknote, Target, Plus, Loader2, Sparkles, MoveRight, CheckCircle2, ChevronDown, MessageSquareQuote } from 'lucide-react';
+
+const TESTIMONIALS = [
+  { name: "Siska D.", text: "Donatnya beneran lumer di mulut! Paling suka yang Choco Melt.", role: "Mahasiswa UNS" },
+  { name: "Reza F.", text: "Harganya ramah banget di kantong buat porsi segini. Nagih!", role: "Mahasiswa UMS" },
+  { name: "Amanda P.", text: "Beli yang Family Box buat kumpul temen, langsung ludes dalam 5 menit.", role: "Pekerja Kantoran" },
+  { name: "Bima S.", text: "Matcha-nya kerasa banget premiumnya, nggak yang abal-abal.", role: "Food Blogger" },
+  { name: "Dina M.", text: "Packagingnya lucu parah! Cocok buat dikasih ke pacar atau sahabat.", role: "Mahasiswa ISI" },
+];
+
+const FAQS = [
+  { q: "Apakah donat ini digoreng?", a: "Sama sekali tidak! Donat pancake kami 100% dipanggang menggunakan cetakan khusus sehingga menghasilkan tekstur yang fluffy dan tidak berminyak." },
+  { q: "Berapa lama donat ini bisa bertahan?", a: "Kami menyarankan untuk langsung dikonsumsi selagi hangat. Namun jika ingin disimpan, bisa bertahan hingga 2 hari di suhu ruang dalam keadaan tertutup rapat." },
+  { q: "Apakah bisa mix varian rasa untuk pembelian paket?", a: "Tentu saja! Untuk pembelian paket (Mini Box, Best Seller Box, dll), Anda bebas memilih kombinasi rasa apapun sesuai selera." },
+];
 
 export default function Home() {
   const { addItem } = useCartStore();
   const { addToast } = useToastStore();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
 
   useEffect(() => {
     fetch('/api/products')
@@ -62,7 +79,7 @@ export default function Home() {
   };
 
   return (
-    <div style={{ paddingBottom: '0', paddingTop: '100px' }}>
+    <div style={{ paddingBottom: '0', paddingTop: '100px', overflowX: 'hidden' }}>
       
       {/* Hero Section */}
       <section style={{ minHeight: '85vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', textAlign: 'center' }}>
@@ -111,6 +128,35 @@ export default function Home() {
             <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 40px 80px -20px rgba(0,0,0,0.15)', background: 'white' }}>
               <Image src="/images/hero.png" alt="DOCA Donat Pancake Mini" fill style={{ objectFit: 'cover' }} priority />
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Marquee Testimonial Section */}
+      <section style={{ padding: '4rem 0', overflow: 'hidden', background: 'white', borderTop: '1px solid rgba(0,0,0,0.05)', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', whiteSpace: 'nowrap' }}>
+          <motion.div 
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ ease: "linear", duration: 30, repeat: Infinity }}
+            style={{ display: 'flex', gap: '2rem', paddingLeft: '2rem' }}
+          >
+            {[...TESTIMONIALS, ...TESTIMONIALS].map((testi, i) => (
+              <div key={i} style={{ background: '#f8f8fa', padding: '1.5rem', borderRadius: '16px', minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', gap: '4px', color: '#fbbf24' }}>
+                  {[1,2,3,4,5].map((_, idx) => <Sparkles key={idx} size={14} fill="currentColor" />)}
+                </div>
+                <p style={{ color: 'var(--foreground)', fontWeight: 500, fontSize: '0.95rem', whiteSpace: 'normal', lineHeight: 1.5 }}>"{testi.text}"</p>
+                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+                    {testi.name[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{testi.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{testi.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -168,7 +214,7 @@ export default function Home() {
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       style={{ position: 'relative', width: '100%', height: '100%', cursor: 'pointer' }}
                     >
-                      <Image src={product.image} alt={product.name} fill style={{ objectFit: 'contain', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.08))' }} />
+                      <Image src={product.image} alt={product.name} fill style={{ objectFit: 'contain', mixBlendMode: 'multiply', filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.08))' }} />
                     </motion.div>
                   </div>
                   <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -336,16 +382,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="section" style={{ background: 'white' }}>
+        <div className="container" style={{ maxWidth: '800px' }}>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center', marginBottom: '4rem' }}
+          >
+            <h2 className="tracking-tight" style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 800, marginBottom: '1rem', color: 'var(--foreground)' }}>
+              Frequently Asked Questions.
+            </h2>
+          </motion.div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {FAQS.map((faq, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                style={{ background: '#f8f8fa', borderRadius: '16px', overflow: 'hidden' }}
+              >
+                <button 
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  style={{ width: '100%', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--foreground)' }}
+                >
+                  <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>{faq.q}</span>
+                  <motion.div animate={{ rotate: openFaq === i ? 180 : 0 }}>
+                    <ChevronDown size={20} color="var(--text-muted)" />
+                  </motion.div>
+                </button>
+                <motion.div
+                  initial={false}
+                  animate={{ height: openFaq === i ? 'auto' : 0, opacity: openFaq === i ? 1 : 0 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <p style={{ padding: '0 1.5rem 1.5rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>{faq.a}</p>
+                </motion.div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer style={{ background: '#f5f5f7', padding: '4rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <footer style={{ background: '#f5f5f7', padding: '4rem 0 6rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div className="container">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
             <Sparkles size={20} color="var(--foreground)" />
             <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--foreground)', letterSpacing: '-0.5px' }}>DOCA!</span>
           </div>
-          <p style={{ fontSize: '0.95rem' }}>© {new Date().getFullYear()} DOCA! Donat Pancake Mini. All rights reserved.</p>
+          <p style={{ fontSize: '0.95rem', marginBottom: '2rem' }}>© {new Date().getFullYear()} DOCA! Donat Pancake Mini. All rights reserved.</p>
+          
+          <button 
+            onClick={() => setIsAdminModalOpen(true)}
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            Admin Login
+          </button>
         </div>
       </footer>
+
+      <AdminLoginModal isOpen={isAdminModalOpen} onClose={() => setIsAdminModalOpen(false)} />
     </div>
   );
 }
