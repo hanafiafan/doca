@@ -7,6 +7,7 @@ import { formatRupiah } from '@/lib/utils';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CreditCard, QrCode, MapPin, Store, PartyPopper, ArrowRight, Home } from 'lucide-react';
 
 export default function Checkout() {
   const router = useRouter();
@@ -56,76 +57,82 @@ export default function Checkout() {
         {/* STEP 1: FORM */}
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '2rem' }}>💳 Checkout</h1>
+            <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--foreground)' }}>
+              <CreditCard size={32} color="var(--primary)" /> Checkout
+            </h1>
             
             <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: '1fr' }}>
               <GlassCard>
                 <form onSubmit={handleNext} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   
                   <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Nama Lengkap *</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--foreground)' }}>Nama Lengkap *</label>
                     <input 
                       type="text" 
                       required 
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.8)' }}
+                      className="input-field"
                     />
                   </div>
                   
                   <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>No. WhatsApp *</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--foreground)' }}>No. WhatsApp *</label>
                     <input 
                       type="tel" 
                       required 
                       value={formData.phone}
                       onChange={e => setFormData({...formData, phone: e.target.value})}
-                      style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.8)' }}
+                      className="input-field"
                     />
                   </div>
 
                   <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Metode Pengambilan</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--foreground)' }}>Metode Pengambilan</label>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                      <label style={{ flex: 1, padding: '1rem', border: formData.delivery === 'pickup' ? '2px solid var(--primary)' : '1px solid var(--glass-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
+                      <label style={{ flex: 1, padding: '1rem', border: formData.delivery === 'pickup' ? '2px solid var(--primary)' : '1px solid var(--glass-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'center', background: 'rgba(255,255,255,0.5)', transition: 'all 0.2s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                         <input type="radio" name="delivery" value="pickup" checked={formData.delivery === 'pickup'} onChange={() => setFormData({...formData, delivery: 'pickup'})} style={{ display: 'none' }} />
-                        🏪 Pick-up
+                        <Store size={24} color={formData.delivery === 'pickup' ? 'var(--primary)' : 'var(--text-muted)'} />
+                        <span style={{ fontWeight: formData.delivery === 'pickup' ? 700 : 500, color: formData.delivery === 'pickup' ? 'var(--primary)' : 'var(--foreground)' }}>Pick-up</span>
                       </label>
-                      <label style={{ flex: 1, padding: '1rem', border: formData.delivery === 'delivery' ? '2px solid var(--primary)' : '1px solid var(--glass-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'center', background: 'rgba(255,255,255,0.5)' }}>
+                      <label style={{ flex: 1, padding: '1rem', border: formData.delivery === 'delivery' ? '2px solid var(--primary)' : '1px solid var(--glass-border)', borderRadius: '12px', cursor: 'pointer', textAlign: 'center', background: 'rgba(255,255,255,0.5)', transition: 'all 0.2s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                         <input type="radio" name="delivery" value="delivery" checked={formData.delivery === 'delivery'} onChange={() => setFormData({...formData, delivery: 'delivery'})} style={{ display: 'none' }} />
-                        🚚 Delivery
+                        <MapPin size={24} color={formData.delivery === 'delivery' ? 'var(--primary)' : 'var(--text-muted)'} />
+                        <span style={{ fontWeight: formData.delivery === 'delivery' ? 700 : 500, color: formData.delivery === 'delivery' ? 'var(--primary)' : 'var(--foreground)' }}>Delivery</span>
                       </label>
                     </div>
                   </div>
 
                   {formData.delivery === 'delivery' && (
-                    <div>
-                      <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Alamat Lengkap *</label>
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: 'var(--foreground)' }}>Alamat Lengkap *</label>
                       <textarea 
                         required 
                         rows={3}
                         value={formData.address}
                         onChange={e => setFormData({...formData, address: e.target.value})}
-                        style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.8)' }}
+                        className="input-field"
                       />
-                    </div>
+                    </motion.div>
                   )}
 
-                  <div style={{ background: 'var(--glass-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)', marginTop: '1rem' }}>
-                    <h3 style={{ fontWeight: 700, marginBottom: '1rem' }}>Ringkasan Pesanan</h3>
+                  <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)', marginTop: '1rem' }}>
+                    <h3 style={{ fontWeight: 700, marginBottom: '1rem', color: 'var(--foreground)' }}>Ringkasan Pesanan</h3>
                     {items.map(item => (
-                      <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                      <div key={item.productId} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--foreground)' }}>
                         <span>{item.name} x{item.qty}</span>
                         <span style={{ fontWeight: 600 }}>{formatRupiah(item.price * item.qty)}</span>
                       </div>
                     ))}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1rem', borderTop: '2px dashed var(--glass-border)', fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary-dark)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1rem', borderTop: '2px dashed rgba(0,0,0,0.1)', fontWeight: 800, fontSize: '1.2rem', color: 'var(--primary-dark)' }}>
                       <span>Total</span>
                       <span>{formatRupiah(getSubtotal())}</span>
                     </div>
                   </div>
 
-                  <Button type="submit" size="lg" fullWidth>Lanjut Pembayaran</Button>
+                  <Button type="submit" size="lg" fullWidth>
+                    Lanjut Pembayaran <ArrowRight size={18} />
+                  </Button>
                 </form>
               </GlassCard>
             </div>
@@ -136,15 +143,18 @@ export default function Checkout() {
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, y: -50 }} className="flex-center" style={{ minHeight: '60vh' }}>
             <GlassCard style={{ textAlign: 'center', maxWidth: '400px', width: '100%' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Scan QRIS (Simulasi)</h2>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Total: <strong>{formatRupiah(getSubtotal())}</strong></p>
+              <div style={{ color: 'var(--primary)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+                <QrCode size={48} strokeWidth={1.5} />
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Scan QRIS (Simulasi)</h2>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Total: <strong style={{ color: 'var(--foreground)' }}>{formatRupiah(getSubtotal())}</strong></p>
               
-              <div style={{ width: '200px', height: '200px', background: 'white', margin: '0 auto 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', border: '1px solid #ddd' }}>
-                <span style={{ fontSize: '4rem', opacity: 0.2 }}>QR CODE</span>
+              <div style={{ width: '200px', height: '200px', background: 'white', margin: '0 auto 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px', border: '1px solid var(--glass-border)', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                <QrCode size={100} color="var(--primary-light)" strokeWidth={1} />
               </div>
               
               <Button fullWidth onClick={handlePaymentSuccess}>
-                ✅ Simulasi Pembayaran Berhasil
+                Simulasi Pembayaran Berhasil
               </Button>
             </GlassCard>
           </motion.div>
@@ -154,18 +164,24 @@ export default function Checkout() {
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex-center" style={{ minHeight: '60vh' }}>
             <GlassCard style={{ textAlign: 'center', maxWidth: '500px', width: '100%', padding: '3rem 2rem' }}>
-              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
-              <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Pesanan Berhasil!</h2>
+              <div style={{ color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+                <PartyPopper size={64} strokeWidth={1.5} />
+              </div>
+              <h2 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--foreground)' }}>Pesanan Berhasil!</h2>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Terima kasih telah memesan di DOCA!</p>
               
-              <div style={{ background: 'rgba(255,255,255,0.5)', padding: '1.5rem', borderRadius: '12px', border: '1px dashed var(--primary)', marginBottom: '2rem' }}>
+              <div style={{ background: 'var(--surface)', padding: '1.5rem', borderRadius: '12px', border: '1px dashed var(--primary)', marginBottom: '2rem' }}>
                 <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Nomor Pesanan</div>
                 <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-dark)', letterSpacing: '2px' }}>{orderId}</div>
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-                <Button fullWidth onClick={() => router.push('/tracking')}>📍 Lacak Pesanan</Button>
-                <Button fullWidth variant="secondary" onClick={() => router.push('/')}>Kembali ke Beranda</Button>
+                <Button fullWidth onClick={() => router.push('/tracking')}>
+                  <MapPin size={18} /> Lacak Pesanan
+                </Button>
+                <Button fullWidth variant="secondary" onClick={() => router.push('/')}>
+                  <Home size={18} /> Kembali ke Beranda
+                </Button>
               </div>
             </GlassCard>
           </motion.div>

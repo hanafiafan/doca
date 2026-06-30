@@ -1,7 +1,8 @@
 'use client';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { PRODUCTS, BOX_PACKAGES } from '@/lib/products';
+import { BOX_PACKAGES } from '@/lib/products';
 import { formatRupiah } from '@/lib/utils';
 import { useCartStore } from '@/store/useCartStore';
 import { useToastStore } from '@/components/ui/Toast';
@@ -9,10 +10,26 @@ import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
+import { Flame, ShoppingBag, Info, Package, Banknote, Target, Plus, Loader2 } from 'lucide-react';
 
 export default function Home() {
   const { addItem } = useCartStore();
   const { addToast } = useToastStore();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleAddToCart = (product) => {
     addItem(product.id, 1);
@@ -20,11 +37,11 @@ export default function Home() {
   };
 
   const handleAddPackage = (pkg) => {
-    // Add multiple items based on package qty (spread across available products)
-    const perProduct = Math.floor(pkg.qty / PRODUCTS.length);
-    const remainder = pkg.qty % PRODUCTS.length;
+    if (products.length === 0) return addToast('Produk belum dimuat, coba lagi!', 'error');
+    const perProduct = Math.floor(pkg.qty / products.length);
+    const remainder = pkg.qty % products.length;
     
-    PRODUCTS.forEach((p, i) => {
+    products.forEach((p, i) => {
       const qty = perProduct + (i < remainder ? 1 : 0);
       if (qty > 0) addItem(p.id, qty);
     });
@@ -35,27 +52,32 @@ export default function Home() {
     <div style={{ paddingBottom: '4rem' }}>
       {/* Hero Section */}
       <section style={{ minHeight: '90vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at top right, rgba(245, 166, 35, 0.1), transparent 50%), radial-gradient(circle at bottom left, rgba(212, 137, 10, 0.05), transparent 50%)', zIndex: -1 }} />
-        
         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <Badge variant="primary" className="mb-6">🔥 Trending di Surakarta</Badge>
-            <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
+            <Badge variant="primary" className="mb-6">
+              <Flame size={14} style={{ marginRight: '4px' }} />
+              Trending di Surakarta
+            </Badge>
+            <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1.5rem', letterSpacing: '-0.02em', color: 'var(--foreground)' }}>
               Donat Pancake Mini <span className="text-gradient">Premium</span> Harga Mahasiswa.
             </h1>
             <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: 1.6, maxWidth: '500px' }}>
-              Nikmati kelezatan donat pancake mini bertekstur fluffy dengan 7 varian topping premium. Dipanggang sempurna, bukan digoreng!
+              Nikmati kelezatan donat pancake mini bertekstur fluffy dengan 7 varian topping premium. Dipanggang sempurna, bukan digoreng.
             </p>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               <Link href="#menu">
-                <Button size="lg">🍩 Pesan Sekarang</Button>
+                <Button size="lg">
+                  <ShoppingBag size={18} /> Pesan Sekarang
+                </Button>
               </Link>
               <Link href="#about">
-                <Button variant="secondary" size="lg">Tentang DOCA!</Button>
+                <Button variant="secondary" size="lg">
+                  <Info size={18} /> Tentang DOCA!
+                </Button>
               </Link>
             </div>
           </motion.div>
@@ -67,7 +89,7 @@ export default function Home() {
             style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}
           >
             <div style={{ position: 'relative', width: '100%', maxWidth: '500px', aspectRatio: '1/1' }}>
-              <Image src="/images/hero.png" alt="DOCA Donat Pancake Mini" fill style={{ objectFit: 'contain', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.15))' }} priority />
+              <Image src="/images/hero.png" alt="DOCA Donat Pancake Mini" fill style={{ objectFit: 'contain', filter: 'drop-shadow(0 20px 40px rgba(232, 63, 111, 0.15))' }} priority />
               
               <motion.div 
                 animate={{ y: [0, -10, 0] }}
@@ -87,55 +109,63 @@ export default function Home() {
       <section id="menu" className="section">
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <Badge variant="neutral" className="mb-4">Menu Kami</Badge>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>7 Varian Topping Premium</h2>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--foreground)' }}>7 Varian Topping Premium</h2>
             <p style={{ color: 'var(--text-muted)' }}>Pilih favoritmu dan nikmati sensasi lumer di setiap gigitan.</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-            {PRODUCTS.map((product, i) => (
-              <GlassCard key={product.id} hover style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ position: 'relative', height: '240px', background: `${product.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-                  <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10 }}>
-                    <Badge style={{ background: product.color, color: 'white' }}>{product.badge}</Badge>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0', color: 'var(--primary)' }}>
+              <Loader2 size={48} className="animate-spin" />
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
+              {products.map((product) => (
+                <GlassCard key={product.id} hover style={{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid rgba(0,0,0,0.05)' }}>
+                  <div style={{ position: 'relative', height: '240px', background: `${product.color}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10 }}>
+                      <Badge style={{ background: product.color, color: 'white', border: 'none' }}>{product.badge}</Badge>
+                    </div>
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                      <Image src={product.image} alt={product.name} fill style={{ objectFit: 'contain' }} />
+                    </div>
                   </div>
-                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <Image src={product.image} alt={product.name} fill style={{ objectFit: 'contain' }} />
+                  <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--foreground)' }}>{product.name}</h3>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', flex: 1 }}>{product.description}</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--foreground)' }}>{formatRupiah(product.price)}</div>
+                      <Button size="sm" onClick={() => handleAddToCart(product)}>
+                        <Plus size={16} /> Tambah
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>{product.name}</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', flex: 1 }}>{product.description}</p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{formatRupiah(product.price)}</div>
-                    <Button size="sm" onClick={() => handleAddToCart(product)}>+ Tambah</Button>
-                  </div>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
+                </GlassCard>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* Packages Section */}
-      <section id="packages" className="section" style={{ background: 'rgba(255,255,255,0.5)' }}>
+      <section id="packages" className="section" style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,117,151,0.03))' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <Badge variant="neutral" className="mb-4">Paket Box</Badge>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Makin Banyak, Makin Hemat</h2>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--foreground)' }}>Makin Banyak, Makin Hemat</h2>
           </div>
 
           <div style={{ display: 'flex', gap: '1.5rem', overflowX: 'auto', paddingBottom: '2rem', snapType: 'x mandatory' }}>
             {BOX_PACKAGES.map((pkg) => (
-              <GlassCard key={pkg.id} hover style={{ minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start', position: 'relative', border: pkg.popular ? '2px solid var(--primary)' : undefined }}>
+              <GlassCard key={pkg.id} hover style={{ minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start', position: 'relative', border: pkg.popular ? '2px solid var(--primary-light)' : '1px solid rgba(0,0,0,0.05)' }}>
                 {pkg.popular && (
                   <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: 'var(--primary)', color: 'white', padding: '4px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 700 }}>
                     BEST SELLER
                   </div>
                 )}
-                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📦</div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{pkg.name}</h3>
+                <div style={{ textAlign: 'center', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}>
+                    <Package size={32} />
+                  </div>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--foreground)' }}>{pkg.name}</h3>
                   <div style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{pkg.qty} pcs</div>
                 </div>
                 <div style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-dark)' }}>
@@ -150,32 +180,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About & Process */}
+      {/* About Section */}
       <section id="about" className="section">
         <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
           <div>
-            <Badge variant="neutral" className="mb-4">Tentang DOCA!</Badge>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem' }}>Kenapa Harus DOCA?</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--foreground)' }}>Kenapa Harus DOCA?</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {[
-                { icon: '🔥', title: '100% Dipanggang', desc: 'Tidak digoreng, lebih sehat dan tidak berminyak.' },
-                { icon: '📦', title: 'Kemasan Estetik', desc: 'Paper box food grade + stiker hologram premium.' },
-                { icon: '💰', title: 'Harga Terjangkau', desc: 'Kualitas premium dengan harga ramah mahasiswa.' }
+                { icon: Flame, title: '100% Dipanggang', desc: 'Tidak digoreng, lebih sehat dan tidak berminyak.' },
+                { icon: Package, title: 'Kemasan Estetik', desc: 'Paper box food grade + stiker hologram premium.' },
+                { icon: Banknote, title: 'Harga Terjangkau', desc: 'Kualitas premium dengan harga ramah mahasiswa.' }
               ].map((feature, i) => (
-                <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                  <div style={{ fontSize: '1.5rem', background: 'var(--glass-bg)', padding: '0.5rem', borderRadius: '12px' }}>{feature.icon}</div>
+                <div key={i} style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                  <div style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '0.75rem', borderRadius: '12px' }}>
+                    <feature.icon size={24} />
+                  </div>
                   <div>
-                    <h4 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{feature.title}</h4>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{feature.desc}</p>
+                    <h4 style={{ fontWeight: 700, marginBottom: '0.25rem', color: 'var(--foreground)', fontSize: '1.1rem' }}>{feature.title}</h4>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.5 }}>{feature.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
           
-          <GlassCard style={{ padding: '3rem', textAlign: 'center', background: 'linear-gradient(135deg, rgba(245,166,35,0.1), rgba(245,166,35,0.02))' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🍩</div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>Visi Kami</h3>
+          <GlassCard style={{ padding: '3rem', textAlign: 'center', border: '1px solid rgba(232, 63, 111, 0.1)' }}>
+            <div style={{ color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+              <Target size={48} strokeWidth={1.5} />
+            </div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--foreground)' }}>Visi Kami</h3>
             <p style={{ fontStyle: 'italic', color: 'var(--text-muted)', lineHeight: 1.6 }}>
               "Menjadikan DOCA! sebagai pelopor camilan donat pancake mini berbasis teknologi dengan konsep booth container modern yang paling digemari oleh generasi muda di Surakarta."
             </p>
