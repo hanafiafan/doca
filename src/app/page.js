@@ -9,7 +9,7 @@ import { useToastStore } from '@/components/ui/Toast';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
-import { Flame, ShoppingBag, Info, Package, Banknote, Target, Plus, Loader2, Star, ChevronRight } from 'lucide-react';
+import { Flame, ShoppingBag, Info, Package, Banknote, Target, Plus, Loader2, Star, ChevronRight, Sparkles } from 'lucide-react';
 
 export default function Home() {
   const { addItem } = useCartStore();
